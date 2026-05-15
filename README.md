@@ -38,6 +38,12 @@ Inside your folder, include:
 
 ## How to Submit
 
+Full participant tutorial:
+
+```text
+PARTICIPANT_GUIDE.md
+```
+
 1. Fork this repository.
 2. Clone your fork.
 3. Create your folder inside `submissions/your-name/`.
@@ -52,4 +58,3 @@ Pull request title format:
 ```text
 Submission: Your Name
 ```
-
