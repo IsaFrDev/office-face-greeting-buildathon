@@ -365,15 +365,15 @@ export function OfficeMap3D({ onClose }: OfficeMap3DProps) {
         {/* ── Header ───────────────────────────────────────────────────────── */}
         <header className="absolute left-0 right-0 top-0 z-50 flex items-center justify-between p-6 md:p-8">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl">
-              <CompassSVG className="h-8 w-8" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-primary/20 bg-primary/5 backdrop-blur-xl shadow-[0_0_15px_rgba(241,90,36,0.1)]">
+              <CompassSVG className="h-8 w-8 text-primary" />
             </div>
             <div>
               <h2 className="font-black text-2xl uppercase tracking-tighter text-white leading-none">
                 UzCombinator{" "}
-                <span className="text-[#A2D729]">Hub</span>
+                <span className="text-primary drop-shadow-[0_0_8px_#F15A24]">Hub</span>
               </h2>
-              <p className="mt-1 font-mono text-[9px] font-bold uppercase tracking-[0.35em] text-white/30">
+              <p className="mt-1 font-mono text-[9px] font-bold uppercase tracking-[0.35em] text-white/40">
                 Interactive 3D Map · Drag to rotate
               </p>
             </div>
@@ -381,7 +381,7 @@ export function OfficeMap3D({ onClose }: OfficeMap3DProps) {
 
           <div className="flex items-center gap-3">
             <div className="hidden md:flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-md">
-              <Move className="h-3.5 w-3.5 text-[#A2D729]" />
+              <Move className="h-3.5 w-3.5 text-primary" />
               <span className="font-mono text-[9px] font-bold uppercase tracking-widest text-white/40">
                 Drag · Rotate
               </span>
