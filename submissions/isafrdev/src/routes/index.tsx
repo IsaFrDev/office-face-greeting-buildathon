@@ -327,12 +327,14 @@ function KioskPage() {
             
             if (lateMessage) {
                await speakAndWait(lateMessage, "en", { elevenKey });
-               await new Promise(r => setTimeout(r, 500));
+               await new Promise(r => setTimeout(r, 600));
             }
             
-            await speakAndWait(`${timeGreeting}, ${mainResult.person.name}! How are you today?`, speechLang, { elevenKey });
+            const fullStandardGreet = `${timeGreeting}, ${mainResult.person.name}! How are you today? ${weather}`.trim();
+            await speakAndWait(fullStandardGreet, speechLang, { elevenKey });
 
             if (todayReminder && !lateMessage) {
+               await new Promise(r => setTimeout(r, 400));
                await speakAndWait(`Reminder: You have a ${todayReminder.message} today.`, "en", { elevenKey });
             }
 
