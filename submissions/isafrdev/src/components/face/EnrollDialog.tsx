@@ -269,8 +269,17 @@ export function EnrollDialog({
                         setBusy(true);
                         setErr(null);
                         try {
-                          const img = await faceapi.bufferToImage(file);
+                          await loadFaceModels();
+                          const url = URL.createObjectURL(file);
+                          const img = new Image();
+                          img.crossOrigin = "anonymous";
+                          await new Promise<void>((resolve, reject) => {
+                            img.onload = () => resolve();
+                            img.onerror = () => reject(new Error("Rasmni yuklashda xato"));
+                            img.src = url;
+                          });
                           const det = await detectAndDescribe(img);
+                          URL.revokeObjectURL(url);
                           if (!det || !det[0]) throw new Error("Rasmda aniq yuz topilmadi");
                           const box = det[0].detection.box;
                           const snapshot = avatarDataUrlFromFaceBox(img, box, { mirror: false });
