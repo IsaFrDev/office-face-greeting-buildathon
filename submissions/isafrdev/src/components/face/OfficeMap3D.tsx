@@ -76,7 +76,7 @@ const ZONES: Zone[] = [
     type: "sub",
     gradient: "from-emerald-400 to-teal-500",
     accent: "#14b8a6",
-    images: ["/assets/office-zones/mutolaa/1.jpg", "/assets/office-zones/mutolaa/2.jpg"]
+    images: ["/assets/office-zones/mutolaa/mutola1.jpg", "/assets/office-zones/mutolaa/mutola2.jpg"]
   },
   {
     id: "03",
@@ -86,7 +86,7 @@ const ZONES: Zone[] = [
     type: "sub",
     gradient: "from-blue-400 to-indigo-500",
     accent: "#6366f1",
-    images: ["/assets/office-zones/open-space/1.jpg", "/assets/office-zones/open-space/2.jpg"]
+    images: ["/assets/office-zones/open-space/open1.jpg", "/assets/office-zones/open-space/open2.jpg"]
   },
   {
     id: "uzchess",
@@ -96,7 +96,7 @@ const ZONES: Zone[] = [
     type: "sub",
     gradient: "from-purple-400 to-fuchsia-500",
     accent: "#a855f7",
-    images: ["/assets/office-zones/uzchess/1.jpg", "/assets/office-zones/uzchess/2.jpg"]
+    images: ["/assets/office-zones/uzchess/uzchess1.jpg", "/assets/office-zones/uzchess/uzchess2.jpg"]
   },
   {
     id: "04",
@@ -106,7 +106,7 @@ const ZONES: Zone[] = [
     type: "main",
     gradient: "from-orange-600 to-rose-700",
     accent: "#f43f5e",
-    images: ["/assets/office-zones/uzcombinator/1.jpg", "/assets/office-zones/uzcombinator/2.jpg"]
+    images: ["/assets/office-zones/uzcombinator/uzcombinator1.jpg", "/assets/office-zones/uzcombinator/uzcombinator2.jpg"]
   },
   {
     id: "05",
