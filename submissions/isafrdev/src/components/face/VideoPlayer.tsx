@@ -122,10 +122,21 @@ export function VideoPlayer({ playlist, paused = false, videoUnmuted = false }: 
   useEffect(() => {
     const v = videoRef.current;
     if (!v || item?.type !== "video" || !resolvedUrl) return;
+    
     if (paused) {
       v.pause();
     } else {
-      void v.play().catch(() => {});
+      // Small delay to ensure browser state is ready
+      const playPromise = v.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.warn("[VideoPlayer] Auto-play failed or interrupted:", error);
+          // Fallback: try to play on next tick
+          setTimeout(() => {
+            if (!paused && videoRef.current) videoRef.current.play().catch(() => {});
+          }, 100);
+        });
+      }
     }
   }, [paused, resolvedUrl, item?.type]);
 

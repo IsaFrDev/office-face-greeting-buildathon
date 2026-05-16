@@ -366,6 +366,11 @@ function KioskPage() {
           const mightListen =
             voice && prefs.hourlyCheckEnabled && shouldAskHourlyCheck(mainResult.person.id);
 
+          // Safety timeout: if greeting hangs (voice AI slow), dismiss after 15s anyway
+          const safetyTimer = setTimeout(() => {
+             if (active) scheduleDismiss(0);
+          }, 15000);
+
           try {
             if (voice) {
               // User requested AI to speak in English
@@ -412,6 +417,7 @@ function KioskPage() {
               }
             }
           } finally {
+            clearTimeout(safetyTimer);
             if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
             scheduleDismiss(mightListen ? 4500 : 3500);
           }
