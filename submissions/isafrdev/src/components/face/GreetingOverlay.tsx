@@ -103,8 +103,6 @@ export function GreetingOverlay({
         className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center p-4 md:p-8 bg-black/10 backdrop-blur-[2px]"
       >
         <div className="relative flex w-full max-w-5xl flex-col items-center justify-center gap-6 md:flex-row md:items-center md:justify-center md:gap-10">
-          {birthdayHighlight && <BirthdaySideRibbon person={main.person} lang={finalLang} />}
-
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 40 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}

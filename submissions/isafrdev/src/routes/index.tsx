@@ -340,7 +340,7 @@ function KioskPage() {
           const weather = await getWeather(shouldCelebrate ? "en" : lang);
           const greetText = shouldCelebrate 
             ? `${timeGreeting}, ${mainResult.person.name}! How are you today? ${weather}`.trim()
-            : `${timeGreeting}, ${mainResult.person.name}! Qalaysiz? ${weather}`.trim();
+            : `${timeGreeting}, ${mainResult.person.name}! Ishlar qalay? ${weather}`.trim();
 
           setSpokenText(greetText);
 
@@ -351,7 +351,7 @@ function KioskPage() {
           try {
             if (voice) {
               // User requested AI to speak in English
-              const speechLang = isBirthday ? "en" : lang;
+              const speechLang = shouldCelebrate ? "en" : lang;
               
               await speakAndWait(greetText, speechLang, { elevenKey });
 
