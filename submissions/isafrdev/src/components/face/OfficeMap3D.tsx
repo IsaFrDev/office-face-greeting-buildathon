@@ -113,9 +113,9 @@ const ZONES: Zone[] = [
   },
 ];
 
-// NAV_BOT path visiting zones but avoiding Founders House
+// NAV_BOT path calculated to hit the center of each zone (Canvas 520x620)
 const NAV_PATH =
-  "M 240 60 L 240 160 C 240 160 450 160 450 200 L 250 350 L 320 350 L 400 450 L 120 450 Z";
+  "M 234 74 L 291 223 L 228 353 L 343 378 L 384 449 L 101 440 Z";
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -594,14 +594,14 @@ function NavBot({ path }: { path: string }) {
   const rafRef = useRef<number | null>(null);
   const isPausedRef = useRef(false);
 
-  // Define milestones on the 0-1 progress scale
+  // Define milestones on the 0-1 progress scale based on path length
   const MILESTONES = [
-    { p: 0.1, msg: "Salom! Ofisga xush kelibsiz." },
-    { p: 0.25, msg: "Founders Cafeda qornimni toyg'azib darsliklarimni qildim." },
-    { p: 0.45, msg: "Mutolaada buni sotib oldim!" },
-    { p: 0.6, msg: "Open Spaceda dam oldim, madaniy hordiq." },
-    { p: 0.75, msg: "UzChessda shaxmat o'ynashni o'rgandim." },
-    { p: 0.9, msg: "UzCombinatorda startupimni rivojlantirdim." },
+    { p: 0.01, msg: "Salom! Ofisga xush kelibsiz." },
+    { p: 0.135, msg: "Founders Cafeda qornimni toyg'azib darsliklarimni qildim." },
+    { p: 0.258, msg: "Mutolaada buni sotib oldim!" },
+    { p: 0.357, msg: "Open Spaceda dam oldim, madaniy hordiq." },
+    { p: 0.427, msg: "UzChessda shaxmat o'ynashni o'rgandim." },
+    { p: 0.669, msg: "UzCombinatorda startupimni rivojlantirdim." },
   ];
 
   useEffect(() => {
@@ -624,7 +624,7 @@ function NavBot({ path }: { path: string }) {
         progressRef.current = (progressRef.current + BASE_SPEED * dt) % 1;
 
         const milestone = MILESTONES.find(
-          (m) => Math.abs(progressRef.current - m.p) < 0.002
+          (m) => Math.abs(progressRef.current - m.p) < 0.005
         );
 
         if (milestone) {
