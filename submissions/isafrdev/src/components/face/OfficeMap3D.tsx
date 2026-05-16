@@ -657,7 +657,7 @@ function NavBot({ path }: { path: string }) {
     <svg
       className="pointer-events-none absolute inset-0 overflow-visible"
       viewBox="0 0 520 620"
-      style={{ transform: "translateZ(55px)" }}
+      style={{ transform: "translateZ(80px)" }}
       aria-hidden="true"
     >
       <g ref={dotRef}>
@@ -667,7 +667,7 @@ function NavBot({ path }: { path: string }) {
               initial={{ scale: 0, opacity: 0, y: 10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0, opacity: 0, y: 5 }}
-              transform="translate(0, -35)"
+              transform="translate(0, -55)"
             >
               <rect
                 x="-90"
