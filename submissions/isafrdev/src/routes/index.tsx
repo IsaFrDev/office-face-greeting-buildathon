@@ -411,22 +411,22 @@ function KioskPage() {
       <header
         className={`pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between p-8 transition-opacity duration-700 ${showHud ? "opacity-100" : "opacity-0"}`}
       >
-        <div className="glass-strong pointer-events-auto flex items-center gap-4 rounded-2xl px-6 py-3 border border-primary/20 bg-primary/5 shadow-[0_0_20px_rgba(241,90,36,0.1)]">
-          <div className="h-2 w-2 rounded-full bg-primary animate-pulse shadow-[0_0_10px_#F15A24]" />
+        <div className="glass-strong pointer-events-auto flex items-center gap-4 rounded-2xl px-6 py-3 border border-black/10 bg-white shadow-xl">
+          <div className="h-2 w-2 rounded-full bg-black animate-pulse shadow-sm" />
           <div>
-            <div className="font-display text-lg font-black tracking-tighter uppercase leading-none text-white">
-              VisionGate <span className="text-primary">AI</span>
+            <div className="font-display text-lg font-black tracking-tighter uppercase leading-none text-black">
+              VisionGate AI
             </div>
-            <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-white/50 mt-1">
+            <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-black/40 mt-1">
               Terminal // Kiosk_Mode
             </div>
           </div>
         </div>
         
         <div className="pointer-events-auto">
-          <div className="glass-strong rounded-2xl px-6 py-3 border border-white/5 shadow-2xl">
+          <div className="glass-strong rounded-2xl px-6 py-3 border border-black/10 bg-white shadow-xl">
             <div
-              className="font-mono text-2xl font-bold leading-none tabular-nums text-primary tracking-tighter"
+              className="font-mono text-2xl font-bold leading-none tabular-nums text-black tracking-tighter"
               suppressHydrationWarning
             >
               {now ? now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }) : "--:--"}
@@ -502,20 +502,20 @@ function KioskPage() {
         <div className="flex gap-3">
           <Link
             to="/admin"
-            className="glass-strong pointer-events-auto flex items-center gap-3 rounded-xl px-5 py-3 text-[10px] font-bold uppercase tracking-[0.2em] transition hover:bg-primary/20 hover:text-white border border-primary/30 bg-primary/10 text-primary shadow-[0_0_20px_rgba(241,90,36,0.15)]"
+            className="glass-strong pointer-events-auto flex items-center gap-3 rounded-xl px-5 py-3 text-[10px] font-bold uppercase tracking-[0.2em] transition hover:bg-black/5 hover:text-black border border-black/10 bg-white text-black shadow-xl"
           >
             <Settings className="h-4 w-4" /> Tizim Boshqaruvi
           </Link>
           <button
             onClick={() => setShowMap(true)}
-            className="glass-strong pointer-events-auto flex items-center gap-3 rounded-xl px-5 py-3 text-[10px] font-bold uppercase tracking-[0.2em] transition hover:bg-primary/20 hover:text-white border border-primary/30 bg-primary/10 text-white shadow-[0_0_20px_rgba(241,90,36,0.15)]"
+            className="glass-strong pointer-events-auto flex items-center gap-3 rounded-xl px-5 py-3 text-[10px] font-bold uppercase tracking-[0.2em] transition hover:bg-black/5 hover:text-black border border-black/10 bg-white text-black shadow-xl"
           >
-            <MapIcon className="h-4 w-4 text-primary" />
+            <MapIcon className="h-4 w-4" />
             <span className="font-black">UzCombinator Hub</span>
           </button>
         </div>
         
-        <div className="glass-strong pointer-events-auto rounded-2xl px-6 py-3 font-mono text-[9px] uppercase tracking-[0.4em] text-white/40 border border-white/10 shadow-xl">
+        <div className="glass-strong pointer-events-auto rounded-2xl px-6 py-3 font-mono text-[9px] uppercase tracking-[0.4em] text-black/40 border border-black/10 shadow-xl">
           Kiosk · Media · Supabase
         </div>
       </footer>
