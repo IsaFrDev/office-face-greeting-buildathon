@@ -465,7 +465,15 @@ export function OfficeMap3D({ onClose }: OfficeMap3DProps) {
             </svg>
 
             {/* ── NAV_BOT ────────────────────────────────────────────────── */}
-            <NavBot path={NAV_PATH} />
+            <NavBot 
+              path={NAV_PATH} 
+              onMilestone={(zoneId) => {
+                setSelectedId(zoneId);
+                setTimeout(() => {
+                  setSelectedId((prev) => (prev === zoneId ? null : prev));
+                }, 5000);
+              }} 
+            />
 
             {/* ── "You are here" pin ─────────────────────────────────────── */}
             <motion.div
@@ -630,7 +638,7 @@ export function OfficeMap3D({ onClose }: OfficeMap3DProps) {
 /**
  * Animates a dot along NAV_PATH with pausing and speaking logic.
  */
-function NavBot({ path }: { path: string }) {
+function NavBot({ path, onMilestone }: { path: string; onMilestone?: (zoneId: string) => void }) {
   const dotRef = useRef<SVGGElement>(null);
   const [currentMessage, setCurrentMessage] = useState<string | null>(null);
   const progressRef = useRef(0);
@@ -639,12 +647,11 @@ function NavBot({ path }: { path: string }) {
 
   // Define milestones on the 0-1 progress scale based on path length
   const MILESTONES = [
-    { p: 0.01, msg: "Salom! Ofisga xush kelibsiz." },
-    { p: 0.135, msg: "Founders Cafeda qornimni toyg'azib darsliklarimni qildim." },
-    { p: 0.258, msg: "Mutolaada buni sotib oldim!" },
-    { p: 0.357, msg: "Open Spaceda dam oldim, madaniy hordiq." },
-    { p: 0.427, msg: "UzChessda shaxmat o'ynashni o'rgandim." },
-    { p: 0.669, msg: "UzCombinatorda startupimni rivojlantirdim." },
+    { p: 0.15, msg: "Sotib oldim! (Mutolaa)", zoneId: "mutolaa" },
+    { p: 0.35, msg: "Shaxmat o'ynashni o'rgandim", zoneId: "uzchess" },
+    { p: 0.55, msg: "Startupni rivojlantirdim (UzCombinator)", zoneId: "04" },
+    { p: 0.75, msg: "Open spacedada dam oldim", zoneId: "03" },
+    { p: 0.92, msg: "Founders cafeda to'ydim", zoneId: "02" },
   ];
 
   useEffect(() => {
@@ -673,10 +680,12 @@ function NavBot({ path }: { path: string }) {
         if (milestone) {
           isPausedRef.current = true;
           setCurrentMessage(milestone.msg);
+          if (onMilestone && milestone.zoneId) onMilestone(milestone.zoneId);
+
           setTimeout(() => {
             isPausedRef.current = false;
             setCurrentMessage(null);
-          }, 4000);
+          }, 5000);
         }
       }
 
