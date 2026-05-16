@@ -536,22 +536,29 @@ export function OfficeMap3D({ onClose }: OfficeMap3DProps) {
                     </div>
                   </div>
 
-                  {/* Right: Images */}
-                  <div className="flex gap-3 h-32 md:h-40 shrink-0">
-                    {[1, 2].map((num, i) => (
-                      <div key={num} className="relative aspect-square md:aspect-[4/3] h-full rounded-2xl overflow-hidden bg-white/5 border border-white/10 group">
+                  {/* Right: Images — prominent auto-slideshow */}
+                  <div className="flex gap-3 h-40 md:h-48 shrink-0">
+                    {(selectedZone.images || []).map((imgUrl, i) => (
+                      <motion.div 
+                        key={imgUrl} 
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={{ delay: i * 0.15 }}
+                        className="relative aspect-[4/3] h-full rounded-2xl overflow-hidden bg-white/5 border border-white/10 group"
+                      >
                         <img 
-                          src={selectedZone.images?.[i] || ""} 
+                          src={imgUrl} 
                           alt="" 
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).src = `https://placehold.co/400x300/181818/A2D729?text=Zone+Photo+${num}`;
+                            (e.target as HTMLImageElement).src = `https://placehold.co/400x300/181818/A2D729?text=Zone+Photo+${i + 1}`;
                           }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
                            <span className="text-[8px] font-mono font-bold text-white uppercase tracking-widest">View Full</span>
                         </div>
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
                 </div>
@@ -685,7 +692,7 @@ function NavBot({ path, onMilestone }: { path: string; onMilestone?: (zoneId: st
           setTimeout(() => {
             isPausedRef.current = false;
             setCurrentMessage(null);
-          }, 5000);
+          }, 6000);
         }
       }
 
