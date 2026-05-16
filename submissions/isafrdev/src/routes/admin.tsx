@@ -1082,15 +1082,30 @@ function LogsView({ logs, onClear }: { logs: any[]; onClear: () => void }) {
       <div className="glass-strong rounded-2xl border-border overflow-hidden shadow-2xl">
         <div className="max-h-[70vh] overflow-y-auto custom-scrollbar font-mono text-[10px] divide-y divide-border">
           {logs.map((log, i) => (
-            <div key={i} className="px-8 py-4 flex items-center gap-8 hover:bg-primary/[0.02] transition-colors">
-              <span className="text-primary/20 tabular-nums w-20">{new Date(log.timestamp).toLocaleTimeString([], { hour12: false })}</span>
-              <span className={`font-bold uppercase tracking-[0.2em] w-24 ${log.personId ? "text-primary" : "text-destructive/70"}`}>
-                {log.personId ? "TASDIQLANDI" : "NOMA'LUM"}
-              </span>
-              <span className="flex-1 text-muted-foreground truncate">
-                Shaxs [{log.name}] Terminal_01 orqali aniqlandi. Aniqlik {(log.confidence*100).toFixed(2)}%.
-              </span>
-              <span className="text-primary/40 px-2 py-0.5 rounded border border-primary/10">BARQAROR</span>
+            <div key={i} className="px-8 py-5 flex flex-col gap-3 hover:bg-primary/[0.02] transition-all duration-300 group">
+              <div className="flex items-center gap-8">
+                <span className="text-primary/30 tabular-nums w-20 font-mono">{new Date(log.timestamp).toLocaleTimeString([], { hour12: false })}</span>
+                <span className={`font-black uppercase tracking-[0.2em] text-[9px] w-24 px-2 py-0.5 rounded text-center border ${log.personId ? "text-primary border-primary/20 bg-primary/5" : "text-destructive/70 border-destructive/20 bg-destructive/5"}`}>
+                  {log.personId ? "TASDIQLANDI" : "NOMA'LUM"}
+                </span>
+                <span className="flex-1 text-muted-foreground/80">
+                  Shaxs <span className="text-foreground font-bold">[{log.name}]</span> Terminal_01 orqali aniqlandi. {(log.confidence*100).toFixed(1)}% aniqlik.
+                </span>
+                {log.transcript && (
+                  <span className="flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-full text-[8px] font-black uppercase tracking-widest animate-pulse shadow-[0_0_15px_rgba(245,158,11,0.1)]">
+                    <Activity className="h-2.5 w-2.5" /> USER_FEEDBACK
+                  </span>
+                )}
+                <span className="text-primary/40 px-2 py-0.5 rounded border border-primary/10 text-[8px] font-bold uppercase tracking-widest group-hover:border-primary/30 transition-colors">BARQAROR</span>
+              </div>
+              
+              {log.transcript && (
+                <div className="ml-28 pl-4 border-l-2 border-amber-500/30 py-1">
+                  <p className="text-amber-500/90 text-[11px] italic font-medium tracking-tight">
+                    "{log.transcript}"
+                  </p>
+                </div>
+              )}
             </div>
           ))}
         </div>

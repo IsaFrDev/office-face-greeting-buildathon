@@ -336,83 +336,10 @@ function KioskPage() {
             return;
           }
 
-          const mainResult = results[0];
-          const prefs = loadKioskPrefs();
-          const lang = mainResult.person.language;
-
-          setActive({ results });
-
-          const h = new Date().getHours();
-          const todayMD = `${String(new Date().getMonth() + 1).padStart(2, "0")}-${String(new Date().getDate()).padStart(2, "0")}`;
-          const isBirthdayToday = mainResult.person.birthday?.slice(5, 10) === todayMD;
-          const shouldCelebrate = isBirthdayToday && !hasBeenCelebratedToday(mainResult.person.id);
-          
-          // Force English as requested
-          const timeGreeting = h < 12 ? "Good morning" : h < 18 ? "Good day" : "Good evening";
-
-          setBirthdayHighlight(shouldCelebrate);
-          const weather = await getWeather("en");
-          const greetText = `${timeGreeting}, ${mainResult.person.name}! How are you today? ${weather}`.trim();
-
-          setSpokenText(greetText);
-
-          const mightListen =
-            voice && prefs.hourlyCheckEnabled && shouldAskHourlyCheck(mainResult.person.id);
-
-          // Safety timeout: if greeting hangs (voice AI slow), dismiss after 15s anyway
-          const safetyTimer = setTimeout(() => {
-             if (active) scheduleDismiss(0);
-          }, 15000);
-
-          try {
-            if (voice) {
-              const speechLang = "en"; // Always English as requested
-              
-              await speakAndWait(greetText, speechLang, { elevenKey });
-
-              if (shouldCelebrate) {
-                playCelebrateSound();
-                triggerConfetti();
-                await speakAndWait(birthdaySpeechLine(mainResult.person.name, "en"), "en", { elevenKey });
-                markCelebratedToday(mainResult.person.id);
-              }
-
-              if (mightListen) {
-                const prior = getHourlyMem(mainResult.person.id);
-                // Use "en" for question building
-                let q = buildHourlyQuestion(mainResult.person.name, "en", prior?.transcript ?? null);
-                if (prefs.hourlyUseOpenAI) {
-                  const polished = await polishHourlyFollowUp(
-                    `Employee ${mainResult.person.name}. Previous note: "${prior?.transcript ?? "none"}". One short warm sentence asking mood + today's plan.`,
-                    "English",
-                  );
-                  if (polished) q = polished;
-                }
-
-                setSpokenText(`${greetText}\n\n${q}`);
-                await speakAndWait(q, "en", { elevenKey });
-
-                const heard = await listen("en");
-                if (heard.trim()) {
-                  saveHourlyResponse(mainResult.person.id, heard);
-                  
-                  // ADMIN FEEDBACK: Send what user said to Telegram
-                  sendTelegram(`<b>Feedback:</b> ${mainResult.person.name} dedi ki: "${heard}"`);
-
-                  const thanks = `Thank you, ${mainResult.person.name}. Have a great day!`;
-                  setSpokenText(`${greetText}\n\n${q}\n\n(${heard})\n\n${thanks}`);
-                  await speakAndWait(thanks, "en", { elevenKey });
-                }
-              }
-            }
-          } finally {
-            clearTimeout(safetyTimer);
-            if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
-            scheduleDismiss(mightListen ? 4500 : 3500);
-          }
+          await handleRecognize(results, logId);
 
           results.forEach((r) => {
-            sendTelegram(`<b>${r.person.role} keldi:</b> ${isBirthdayToday ? "🎂 " : ""}${r.person.name}`);
+            sendTelegram(`<b>${r.person.role} keldi:</b> ${r.person.birthday?.slice(5, 10) === `${String(new Date().getMonth() + 1).padStart(2, "0")}-${String(new Date().getDate()).padStart(2, "0")}` ? "🎂 " : ""}${r.person.name}`);
           });
 
         }}

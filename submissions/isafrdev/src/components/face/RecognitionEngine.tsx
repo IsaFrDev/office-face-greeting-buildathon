@@ -12,7 +12,7 @@ import {
 import type { Person } from "@/lib/face/types";
 
 interface Props {
-  onRecognize: (results: { person: Person; confidence: number; expression: string }[]) => void;
+  onRecognize: (results: { person: Person; confidence: number; expression: string }[], logId: string) => void;
   onUnknown: (descriptor: number[], snapshot?: string) => void;
   onClear: () => void;
   voiceEnabled: boolean;
@@ -256,16 +256,17 @@ export function RecognitionEngine({ onRecognize, onUnknown, onClear, voiceEnable
               const primary = sorted[0];
               if (shouldGreet(primary.person)) {
                 const now = Date.now();
+                const logId = crypto.randomUUID();
                 sorted.forEach((m) => lastGreetedAtRef.current.set(m.person.id, now));
                 addLog({
-                  id: crypto.randomUUID(),
+                  id: logId,
                   personId: primary.person.id,
                   name: primary.person.name,
                   confidence: primary.confidence,
                   timestamp: now,
                   expression: primary.expression,
                 });
-                onRecognize(sorted);
+                onRecognize(sorted, logId);
               }
             }
           } else {

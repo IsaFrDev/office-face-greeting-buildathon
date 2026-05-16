@@ -116,6 +116,7 @@ export async function addLog(log: RecognitionLog) {
       confidence: log.confidence,
       timestamp: log.timestamp,
       expression: log.expression,
+      transcript: log.transcript || null,
       snapshot: log.snapshot?.slice(0, 500) || null,
     });
   } catch (e) {
@@ -139,6 +140,7 @@ export async function listLogs(limit = 200): Promise<RecognitionLog[]> {
         timestamp: r.timestamp,
         expression: r.expression,
         snapshot: r.snapshot,
+        transcript: r.transcript,
       }));
     }
   } catch (e) {

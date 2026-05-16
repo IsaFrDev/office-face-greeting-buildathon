@@ -25,6 +25,7 @@ export interface RecognitionLog {
   timestamp: number;
   snapshot?: string;
   expression?: string;
+  transcript?: string; // Spoken feedback from user
 }
 
 export interface RecognitionEvent {
