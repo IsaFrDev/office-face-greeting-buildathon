@@ -43,6 +43,7 @@ type Zone = {
   type: "start" | "main" | "sub";
   gradient: string; // Tailwind gradient classes
   accent: string;   // hex for glow/border
+  images?: string[]; // Array of image URLs
 };
 
 // ─── Data ────────────────────────────────────────────────────────────────────
@@ -56,6 +57,7 @@ const ZONES: Zone[] = [
     type: "start",
     gradient: "from-amber-400 to-orange-500",
     accent: "#f97316",
+    images: ["/assets/office-zones/entrance/1.jpg", "/assets/office-zones/entrance/2.jpg"]
   },
   {
     id: "02",
@@ -65,6 +67,7 @@ const ZONES: Zone[] = [
     type: "main",
     gradient: "from-orange-500 to-red-600",
     accent: "#ef4444",
+    images: ["/assets/office-zones/cafe/1.jpg", "/assets/office-zones/cafe/2.jpg"]
   },
   {
     id: "mutolaa",
@@ -74,6 +77,7 @@ const ZONES: Zone[] = [
     type: "sub",
     gradient: "from-emerald-400 to-teal-500",
     accent: "#14b8a6",
+    images: ["/assets/office-zones/mutolaa/1.jpg", "/assets/office-zones/mutolaa/2.jpg"]
   },
   {
     id: "03",
@@ -83,6 +87,7 @@ const ZONES: Zone[] = [
     type: "sub",
     gradient: "from-blue-400 to-indigo-500",
     accent: "#6366f1",
+    images: ["/assets/office-zones/open-space/1.jpg", "/assets/office-zones/open-space/2.jpg"]
   },
   {
     id: "uzchess",
@@ -92,6 +97,7 @@ const ZONES: Zone[] = [
     type: "sub",
     gradient: "from-purple-400 to-fuchsia-500",
     accent: "#a855f7",
+    images: ["/assets/office-zones/uzchess/1.jpg", "/assets/office-zones/uzchess/2.jpg"]
   },
   {
     id: "04",
@@ -101,6 +107,7 @@ const ZONES: Zone[] = [
     type: "main",
     gradient: "from-orange-600 to-rose-700",
     accent: "#f43f5e",
+    images: ["/assets/office-zones/uzcombinator/1.jpg", "/assets/office-zones/uzcombinator/2.jpg"]
   },
   {
     id: "05",
@@ -110,6 +117,7 @@ const ZONES: Zone[] = [
     type: "main",
     gradient: "from-red-900 to-black",
     accent: "#000000",
+    images: ["/assets/office-zones/founder-house/1.jpg", "/assets/office-zones/founder-house/2.jpg"]
   },
 ];
 
@@ -494,34 +502,71 @@ export function OfficeMap3D({ onClose }: OfficeMap3DProps) {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: "100%", opacity: 0 }}
               transition={{ type: "spring", stiffness: 380, damping: 36 }}
-              className="absolute bottom-0 left-0 right-0 z-50 flex items-end justify-center px-6 pb-28"
+              className="absolute bottom-0 left-0 right-0 z-50 flex items-end justify-center px-6 pb-20 md:pb-28"
               style={{ pointerEvents: "none" }}
             >
               <div
-                className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#181818]/90 p-5 backdrop-blur-xl shadow-2xl"
+                className="w-full max-w-2xl rounded-3xl border border-white/10 bg-[#181818]/95 p-6 backdrop-blur-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)]"
                 style={{ pointerEvents: "all" }}
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="mb-1 font-mono text-[8px] font-black uppercase tracking-[0.3em] text-white/30">
-                      Zone {selectedZone.id}
+                <div className="flex flex-col md:flex-row gap-6">
+                  {/* Left: Info */}
+                  <div className="flex-1">
+                    <div className="mb-2 font-mono text-[8px] font-black uppercase tracking-[0.4em] text-white/30">
+                      Spatial Intelligence · Zone {selectedZone.id}
                     </div>
-                    <h3 className="text-lg font-black uppercase tracking-tight text-white">
+                    <h3 className="text-2xl font-black uppercase tracking-tighter text-white">
                       {selectedZone.name}
                     </h3>
-                    <p className="mt-1 text-sm text-white/50">
+                    <p className="mt-2 text-sm leading-relaxed text-white/50">
                       {selectedZone.description}
                     </p>
+                    
+                    <div className="mt-6 flex items-center gap-3">
+                      <div className={`h-1.5 w-1.5 rounded-full bg-gradient-to-br ${selectedZone.gradient} animate-pulse shadow-[0_0_10px_${selectedZone.accent}]`} />
+                      <span className="font-mono text-[9px] font-bold uppercase tracking-widest text-white/40">
+                        Live Status: Optimal
+                      </span>
+                    </div>
                   </div>
-                  <div
-                    className={`h-3 w-3 shrink-0 mt-1 rounded-full bg-gradient-to-br ${selectedZone.gradient} shadow-lg`}
-                  />
+
+                  {/* Right: Images */}
+                  <div className="flex gap-3 h-32 md:h-40 shrink-0">
+                    {[1, 2].map((num, i) => (
+                      <div key={num} className="relative aspect-square md:aspect-[4/3] h-full rounded-2xl overflow-hidden bg-white/5 border border-white/10 group">
+                        <img 
+                          src={selectedZone.images?.[i] || ""} 
+                          alt="" 
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = `https://placehold.co/400x300/181818/A2D729?text=Zone+Photo+${num}`;
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                           <span className="text-[8px] font-mono font-bold text-white uppercase tracking-widest">View Full</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="mt-4 flex items-center gap-2">
-                  <Navigation className="h-3.5 w-3.5 text-[#A2D729]" />
-                  <span className="font-mono text-[9px] font-bold uppercase tracking-widest text-[#A2D729]/70">
-                    Navigate here
-                  </span>
+
+                <div className="mt-6 pt-6 border-t border-white/5 flex items-center justify-between">
+                   <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        <Navigation className="h-4 w-4 text-[#A2D729]" />
+                        <span className="font-mono text-[10px] font-black uppercase tracking-widest text-[#A2D729]">
+                          Yo'nalish olish
+                        </span>
+                      </div>
+                      <div className="h-4 w-[1px] bg-white/10" />
+                      <div className="text-[10px] text-white/30 font-bold uppercase tracking-widest">NAV_PATH: Active</div>
+                   </div>
+                   <button 
+                    onClick={() => setSelectedId(null)}
+                    className="text-[10px] font-bold text-white/20 hover:text-white uppercase tracking-widest transition"
+                   >
+                     Yopish [Esc]
+                   </button>
                 </div>
               </div>
             </motion.div>
