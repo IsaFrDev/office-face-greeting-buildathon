@@ -409,24 +409,24 @@ function KioskPage() {
 
       {/* ── HUD Top Bar ── */}
       <header
-        className={`pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between p-8 transition-opacity duration-700 ${showHud ? "opacity-100" : "opacity-0"}`}
+        className={`pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between p-4 md:p-6 transition-opacity duration-700 ${showHud ? "opacity-100" : "opacity-0"}`}
       >
-        <div className="glass-strong pointer-events-auto flex items-center gap-4 rounded-2xl px-6 py-3 border border-black/10 bg-white shadow-xl">
-          <div className="h-2 w-2 rounded-full bg-black animate-pulse shadow-sm" />
+        <div className="glass-strong pointer-events-auto flex items-center gap-3 rounded-xl px-4 py-2 border border-black/10 bg-white shadow-lg">
+          <div className="h-1.5 w-1.5 rounded-full bg-black animate-pulse shadow-sm" />
           <div>
-            <div className="font-display text-lg font-black tracking-tighter uppercase leading-none text-black">
+            <div className="font-display text-sm font-black tracking-tighter uppercase leading-none text-black">
               VisionGate AI
             </div>
-            <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-black/40 mt-1">
+            <div className="font-mono text-[7px] uppercase tracking-[0.3em] text-black/40 mt-0.5">
               Terminal // Kiosk_Mode
             </div>
           </div>
         </div>
         
         <div className="pointer-events-auto">
-          <div className="glass-strong rounded-2xl px-6 py-3 border border-black/10 bg-white shadow-xl">
+          <div className="glass-strong rounded-xl px-4 py-2 border border-black/10 bg-white shadow-lg">
             <div
-              className="font-mono text-2xl font-bold leading-none tabular-nums text-black tracking-tighter"
+              className="font-mono text-xl font-bold leading-none tabular-nums text-black tracking-tighter"
               suppressHydrationWarning
             >
               {now ? now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }) : "--:--"}
@@ -497,25 +497,25 @@ function KioskPage() {
 
       {/* ── HUD Bottom Bar ── */}
       <footer
-        className={`pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-end justify-between p-8 transition-opacity duration-700 ${showHud ? "opacity-100" : "opacity-0"}`}
+        className={`pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-end justify-between p-4 md:p-6 transition-opacity duration-700 ${showHud ? "opacity-100" : "opacity-0"}`}
       >
-        <div className="flex gap-3">
+        <div className="flex gap-2">
           <Link
             to="/admin"
-            className="glass-strong pointer-events-auto flex items-center gap-3 rounded-xl px-5 py-3 text-[10px] font-bold uppercase tracking-[0.2em] transition hover:bg-black/5 hover:text-black border border-black/10 bg-white text-black shadow-xl"
+            className="glass-strong pointer-events-auto flex items-center gap-2 rounded-lg px-3 py-2 text-[9px] font-bold uppercase tracking-[0.15em] transition hover:bg-black/5 hover:text-black border border-black/10 bg-white text-black shadow-lg"
           >
-            <Settings className="h-4 w-4" /> Tizim Boshqaruvi
+            <Settings className="h-3 w-3" /> Tizim
           </Link>
           <button
             onClick={() => setShowMap(true)}
-            className="glass-strong pointer-events-auto flex items-center gap-3 rounded-xl px-5 py-3 text-[10px] font-bold uppercase tracking-[0.2em] transition hover:bg-black/5 hover:text-black border border-black/10 bg-white text-black shadow-xl"
+            className="glass-strong pointer-events-auto flex items-center gap-2 rounded-lg px-3 py-2 text-[9px] font-bold uppercase tracking-[0.15em] transition hover:bg-black/5 hover:text-black border border-black/10 bg-white text-black shadow-lg"
           >
-            <MapIcon className="h-4 w-4" />
-            <span className="font-black">UzCombinator Hub</span>
+            <MapIcon className="h-3 w-3" />
+            <span className="font-bold">Hub</span>
           </button>
         </div>
         
-        <div className="glass-strong pointer-events-auto rounded-2xl px-6 py-3 font-mono text-[9px] uppercase tracking-[0.4em] text-black/40 border border-black/10 shadow-xl">
+        <div className="glass-strong pointer-events-auto rounded-lg px-4 py-2 font-mono text-[7px] uppercase tracking-[0.4em] text-black/40 border border-black/10 shadow-lg">
           Kiosk · Media · Supabase
         </div>
       </footer>
