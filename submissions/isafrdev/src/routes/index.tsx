@@ -347,21 +347,14 @@ function KioskPage() {
           const isBirthdayToday = mainResult.person.birthday?.slice(5, 10) === todayMD;
           const shouldCelebrate = isBirthdayToday && !hasBeenCelebratedToday(mainResult.person.id);
           
-          let timeGreeting = "";
-          if (shouldCelebrate) {
-            timeGreeting = h < 12 ? "Good morning" : h < 18 ? "Good day" : "Good evening";
-          } else {
-            timeGreeting = h < 12 ? "Xayrli tong" : h < 18 ? "Xayrli kun" : "Xayrli kech";
-          }
+          // Force English as requested
+          const timeGreeting = h < 12 ? "Good morning" : h < 18 ? "Good day" : "Good evening";
 
           setBirthdayHighlight(shouldCelebrate);
-          const weather = await getWeather(shouldCelebrate ? "en" : lang);
-          const greetText = shouldCelebrate 
-            ? `${timeGreeting}, ${mainResult.person.name}! How are you today? ${weather}`.trim()
-            : `${timeGreeting}, ${mainResult.person.name}! Ishlar qalay? ${weather}`.trim();
+          const weather = await getWeather("en");
+          const greetText = `${timeGreeting}, ${mainResult.person.name}! How are you today? ${weather}`.trim();
 
           setSpokenText(greetText);
-
 
           const mightListen =
             voice && prefs.hourlyCheckEnabled && shouldAskHourlyCheck(mainResult.person.id);
@@ -373,46 +366,42 @@ function KioskPage() {
 
           try {
             if (voice) {
-              // User requested AI to speak in English
-              const speechLang = shouldCelebrate ? "en" : lang;
+              const speechLang = "en"; // Always English as requested
               
               await speakAndWait(greetText, speechLang, { elevenKey });
 
               if (shouldCelebrate) {
                 playCelebrateSound();
                 triggerConfetti();
-                // Specifically speak the birthday line in English as requested ("AI inglizcha gaprisin")
                 await speakAndWait(birthdaySpeechLine(mainResult.person.name, "en"), "en", { elevenKey });
                 markCelebratedToday(mainResult.person.id);
               }
 
-
               if (mightListen) {
                 const prior = getHourlyMem(mainResult.person.id);
-                let q = buildHourlyQuestion(mainResult.person.name, lang, prior?.transcript ?? null);
+                // Use "en" for question building
+                let q = buildHourlyQuestion(mainResult.person.name, "en", prior?.transcript ?? null);
                 if (prefs.hourlyUseOpenAI) {
-                  const langHint = lang === "en" ? "English" : lang === "ru" ? "Russian" : "Uzbek";
                   const polished = await polishHourlyFollowUp(
                     `Employee ${mainResult.person.name}. Previous note: "${prior?.transcript ?? "none"}". One short warm sentence asking mood + today's plan.`,
-                    langHint,
+                    "English",
                   );
                   if (polished) q = polished;
                 }
 
                 setSpokenText(`${greetText}\n\n${q}`);
-                await speakAndWait(q, lang, { elevenKey });
+                await speakAndWait(q, "en", { elevenKey });
 
-                const heard = await listen(lang);
+                const heard = await listen("en");
                 if (heard.trim()) {
                   saveHourlyResponse(mainResult.person.id, heard);
-                  const thanks =
-                    lang === "en"
-                      ? `Thank you, ${mainResult.person.name}.`
-                      : lang === "ru"
-                        ? `Спасибо, ${mainResult.person.name}.`
-                        : `Rahmat, ${mainResult.person.name}. Yaxshi kun tilayman.`;
+                  
+                  // ADMIN FEEDBACK: Send what user said to Telegram
+                  sendTelegram(`<b>Feedback:</b> ${mainResult.person.name} dedi ki: "${heard}"`);
+
+                  const thanks = `Thank you, ${mainResult.person.name}. Have a great day!`;
                   setSpokenText(`${greetText}\n\n${q}\n\n(${heard})\n\n${thanks}`);
-                  await speakAndWait(thanks, lang, { elevenKey });
+                  await speakAndWait(thanks, "en", { elevenKey });
                 }
               }
             }
