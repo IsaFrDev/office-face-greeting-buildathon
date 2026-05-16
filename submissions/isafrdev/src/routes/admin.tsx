@@ -24,6 +24,8 @@ import {
   Eraser,
   X,
   GripVertical,
+  ChevronUp,
+  ChevronDown,
   Map as MapIcon
 } from "lucide-react";
 
@@ -745,18 +747,39 @@ function SettingsView({
             </div>
           </div>
 
-          <label className="flex items-start gap-3 cursor-pointer rounded-xl border border-border p-4 hover:bg-muted/30 transition">
-            <input
-              type="checkbox"
-              className="mt-1"
-              checked={kp.hourlyCheckEnabled}
-              onChange={(e) => patchKiosk({ hourlyCheckEnabled: e.target.checked })}
-            />
-            <span className="text-xs leading-relaxed">
-              <span className="font-bold uppercase tracking-wide text-[10px] block text-primary">Har 30 daqiqada tekshiruv</span>
-              Salomdan keyin kayfiyat va rejani so‘raydi; Web Speech tinglash (Chrome). Oxirgi savildan kamida <strong className="text-foreground">30 daqiqa</strong> o‘tgach qayta so‘raladi.
-            </span>
-          </label>
+          <div className="flex flex-col gap-4 rounded-xl border border-border p-4 hover:bg-muted/30 transition md:col-span-2">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={kp.hourlyCheckEnabled}
+                onChange={(e) => patchKiosk({ hourlyCheckEnabled: e.target.checked })}
+              />
+              <span className="text-xs leading-relaxed">
+                <span className="font-bold uppercase tracking-wide text-[10px] block text-primary">Dinamik tekshiruv (Mood/Plan)</span>
+                Salomdan keyin kayfiyat va rejani so‘raydi; Web Speech tinglash (Chrome). Tanlangan oraliqda qayta so‘raladi.
+              </span>
+            </label>
+            
+            {kp.hourlyCheckEnabled && (
+              <div className="pl-7 mt-2 flex items-center gap-4">
+                <div>
+                  <label className="text-[9px] font-mono uppercase text-muted-foreground block mb-1">Takrorlanish oralig‘i (minut)</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={1440}
+                    value={kp.hourlyIntervalMinutes}
+                    onChange={(e) => patchKiosk({ hourlyIntervalMinutes: Number(e.target.value) })}
+                    className="w-24 bg-background border border-border rounded-lg px-2 py-1 text-xs"
+                  />
+                </div>
+                <div className="text-[10px] text-muted-foreground italic">
+                  Hozir: har <strong className="text-foreground">{kp.hourlyIntervalMinutes} minutda</strong>
+                </div>
+              </div>
+            )}
+          </div>
 
           <label className="flex items-start gap-3 cursor-pointer rounded-xl border border-border p-4 hover:bg-muted/30 transition">
             <input
@@ -908,54 +931,84 @@ function MediaView({
         axis="y"
         values={playlist}
         onReorder={reorderItems}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        className="flex flex-col gap-4"
       >
         {playlist.map((item, idx) => (
           <Reorder.Item
             key={item.id}
             value={item}
-            className="glass rounded-2xl overflow-hidden border-border hover:border-primary/30 transition-all duration-500 group shadow-lg flex flex-col cursor-grab active:cursor-grabbing"
+            className="glass rounded-2xl overflow-hidden border-border hover:border-primary/30 transition-all duration-300 group shadow-lg flex items-center gap-6 p-4 cursor-grab active:cursor-grabbing bg-card"
           >
+            {/* Drag Handle & Index */}
+            <div className="flex flex-col items-center gap-2">
+               <div className="p-2 bg-muted rounded-lg text-muted-foreground group-hover:text-primary transition-colors cursor-ns-resize">
+                  <GripVertical className="h-5 w-5" />
+               </div>
+               <span className="font-mono text-xs font-bold text-muted-foreground">#{idx + 1}</span>
+            </div>
+
+            {/* Thumbnail */}
             <div
-              className="aspect-video bg-black flex items-center justify-center relative"
+              className="h-24 w-40 bg-black flex items-center justify-center relative rounded-xl overflow-hidden flex-shrink-0"
               onClick={() => void handlePreview(item)}
             >
-              <div className="absolute top-3 left-3 px-2 py-1 rounded bg-black/60 text-[9px] font-mono text-primary border border-primary/20 backdrop-blur z-10">
-                {idx + 1}.{" "}
-                {item.type === "video" ? "VIDEO" : item.type === "image" ? "RASM" : "KARTOCHKA"}
-              </div>
-              
-              <div className="absolute top-3 right-3 flex items-center gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="p-1.5 bg-black/60 rounded border border-white/10 text-white/50 cursor-ns-resize">
-                  <GripVertical className="h-4 w-4" />
-                </div>
-              </div>
-
               {item.type === "video" && item.poster && (
                 <img
                   src={item.poster}
                   alt=""
-                  className="absolute inset-0 h-full w-full object-cover opacity-45 group-hover:opacity-70 transition-opacity"
+                  className="absolute inset-0 h-full w-full object-cover opacity-60"
                 />
               )}
-
               {item.type === "video" ? (
-                <Play className="relative z-[1] h-10 w-10 text-primary/20 group-hover:text-primary transition-all duration-500 group-hover:scale-110" />
+                <Play className="relative z-[1] h-6 w-6 text-white" />
               ) : (
-                <ImageIcon className="relative z-[1] h-10 w-10 text-primary/20 group-hover:text-primary transition-all duration-500 group-hover:scale-110" />
+                <ImageIcon className="relative z-[1] h-6 w-6 text-white" />
               )}
-
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60 pointer-events-none" />
             </div>
-            <div className="p-5 bg-card border-t border-border flex-1 space-y-3">
-              <div className="flex items-start justify-between gap-3">
-                <div className="truncate flex-1 min-w-0">
-                  <div className="text-xs font-bold truncate text-foreground/90">{item.name || "Media Element"}</div>
-                  <div className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest mt-1">
-                    #{idx + 1} {item.type === "video" && <span className="text-primary/70"> · video</span>}
-                  </div>
-                </div>
-                <button 
+
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+               <div className="text-sm font-bold truncate text-foreground/90 mb-1">{item.name || "Media Element"}</div>
+               <div className="flex items-center gap-3">
+                  <span className="text-[9px] font-mono font-black uppercase px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
+                    {item.type === "video" ? "VIDEO" : "IMAGE"}
+                  </span>
+                  {item.type === "image" && (
+                    <div className="flex items-center gap-2">
+                       <span className="text-[9px] font-mono text-muted-foreground uppercase">Duration:</span>
+                       <input
+                        type="number"
+                        min={2}
+                        max={120}
+                        defaultValue={(item.duration ?? 5000) / 1000}
+                        onBlur={(e) => setImageDurationSeconds(item.id, Number(e.target.value))}
+                        className="w-12 bg-muted/50 border border-border rounded px-1.5 py-0.5 text-[10px] font-mono outline-none"
+                      />
+                      <span className="text-[9px] font-mono text-muted-foreground">sec</span>
+                    </div>
+                  )}
+               </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-2 pr-2">
+               <div className="flex flex-col gap-1 mr-4">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); moveItem(idx, "up"); }}
+                    disabled={idx === 0}
+                    className="p-1 hover:bg-primary/10 hover:text-primary rounded disabled:opacity-20 transition-colors"
+                  >
+                    <ChevronUp className="h-4 w-4" />
+                  </button>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); moveItem(idx, "down"); }}
+                    disabled={idx === playlist.length - 1}
+                    className="p-1 hover:bg-primary/10 hover:text-primary rounded disabled:opacity-20 transition-colors"
+                  >
+                    <ChevronDown className="h-4 w-4" />
+                  </button>
+               </div>
+               <button 
                   type="button"
                   onClick={async (e) => {
                     e.stopPropagation();
@@ -965,27 +1018,10 @@ function MediaView({
                     persistPlaylist(np, storageKey);
                     onRefresh();
                   }}
-                  className="flex-shrink-0 p-3 text-muted-foreground/30 hover:text-destructive hover:bg-destructive/10 rounded-xl transition-all duration-300"
+                  className="p-3 text-muted-foreground/30 hover:text-destructive hover:bg-destructive/10 rounded-xl transition-all"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-5 w-5" />
                 </button>
-              </div>
-              {item.type === "image" && (
-                <div className="flex items-center gap-2 pt-2 border-t border-border/80">
-                  <label className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground whitespace-nowrap">
-                    Slid (sek)
-                  </label>
-                  <input
-                    type="number"
-                    key={item.id}
-                    min={2}
-                    max={120}
-                    defaultValue={(item.duration ?? 5000) / 1000}
-                    onBlur={(e) => setImageDurationSeconds(item.id, Number(e.target.value))}
-                    className="w-full max-w-[5rem] bg-background border border-border rounded-lg px-2 py-1.5 text-[11px] font-mono outline-none focus:border-primary"
-                  />
-                </div>
-              )}
             </div>
           </Reorder.Item>
         ))}
