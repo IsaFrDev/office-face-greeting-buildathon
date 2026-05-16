@@ -1,8 +1,50 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { ShieldCheck, Smile, Fingerprint, Users, Cake, Sparkles, Gift } from "lucide-react";
-import type { Language, Person } from "@/lib/face/types";
+import { ShieldCheck, Smile, Fingerprint, Users, Cake, Sparkles, Gift, BellRing, Info } from "lucide-react";
+import type { Language, Person, Reminder } from "@/lib/face/types";
 
 export type GreetingResultRow = { person: Person; confidence: number; expression: string };
+
+function ReminderCard({ reminder }: { reminder: Reminder }) {
+  return (
+    <motion.aside
+      initial={{ x: -120, opacity: 0, rotate: -2 }}
+      animate={{ x: 0, opacity: 1, rotate: 0 }}
+      exit={{ x: -120, opacity: 0 }}
+      transition={{ type: "spring", stiffness: 280, damping: 26 }}
+      className="pointer-events-none relative order-3 w-full max-w-[min(100%,18rem)] shrink-0 md:order-0"
+    >
+      <div className="relative overflow-hidden rounded-[2rem] border border-blue-400/35 bg-gradient-to-br from-blue-500/25 via-indigo-500/20 to-sky-600/20 px-6 py-8 shadow-[0_0_60px_-12px_rgba(59,130,246,0.45)] backdrop-blur-md">
+        <div className="pointer-events-none absolute -left-6 -top-6 h-28 w-28 rounded-full bg-blue-300/30 blur-2xl" />
+        
+        <div className="relative flex flex-col items-center text-center gap-4">
+          <div className="flex items-center justify-center gap-2 rounded-full bg-black/25 px-4 py-1.5 text-[9px] font-mono font-bold uppercase tracking-[0.35em] text-blue-100 border border-blue-400/30">
+            <BellRing className="h-3.5 w-3.5 text-blue-300 animate-bounce" /> Eslatma
+          </div>
+
+          {reminder.imageUrl ? (
+             <div className="h-24 w-full rounded-xl overflow-hidden border border-white/10 shadow-lg">
+                <img src={reminder.imageUrl} className="h-full w-full object-cover" alt="Reminder" />
+             </div>
+          ) : (
+             <Info className="h-12 w-12 text-blue-200 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
+          )}
+
+          <h3 className="font-display text-lg font-black uppercase tracking-tight text-white leading-tight">
+            Bugungi Vazifa
+          </h3>
+          <p className="text-sm font-medium text-blue-50/90 leading-relaxed">
+            "{reminder.message}"
+          </p>
+          
+          <div className="mt-2 w-full h-[1px] bg-white/10" />
+          <div className="text-[8px] font-mono font-bold text-white/40 uppercase tracking-widest">
+            ID: {reminder.id.slice(0, 8)}
+          </div>
+        </div>
+      </div>
+    </motion.aside>
+  );
+}
 
 function birthdayCopy(lang: Language, name: string) {
   const n = name.trim();
@@ -79,12 +121,14 @@ export function GreetingOverlay({
   spokenText,
   birthdayHighlight,
   language,
+  reminder,
 }: {
   results: GreetingResultRow[] | null;
   spokenText?: string | null;
   /** Tug‘ilgan kuni bo‘lsa — markaz kartadan tashqari yon tabrik lentasi */
   birthdayHighlight?: boolean;
   language?: Language;
+  reminder?: Reminder | null;
 }) {
   if (!results || results.length === 0) return null;
 
@@ -102,7 +146,11 @@ export function GreetingOverlay({
         exit={{ opacity: 0 }}
         className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center p-4 md:p-8 bg-black/10 backdrop-blur-[2px]"
       >
-        <div className="relative flex w-full max-w-5xl flex-col items-center justify-center gap-6 md:flex-row md:items-center md:justify-center md:gap-10">
+        <div className="relative flex w-full max-w-6xl flex-col items-center justify-center gap-6 md:flex-row md:items-center md:justify-center md:gap-10">
+          {birthdayHighlight && <BirthdaySideRibbon person={main.person} lang={finalLang} />}
+          
+          {reminder && <ReminderCard reminder={reminder} />}
+
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 40 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}

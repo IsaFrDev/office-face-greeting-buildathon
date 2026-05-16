@@ -9,7 +9,7 @@ import { OfficeMap3D } from "@/components/face/OfficeMap3D";
 import { AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 
-import type { PlaylistItem } from "@/lib/face/types";
+import type { PlaylistItem, Person, Reminder } from "@/lib/face/types";
 import { speakAndWait, listen, birthdaySpeechLine } from "@/lib/face/voice";
 import { sendTelegram } from "@/lib/face/telegram";
 import { getWeather } from "@/lib/face/weather";
@@ -19,6 +19,7 @@ import {
   PLAYLIST_CHANGE_EVENT,
   loadPlaylistFromStorage,
   writePlaylistLocal,
+  addLog,
 } from "@/lib/face/db";
 import {
   loadKioskPrefs,
@@ -81,7 +82,9 @@ function KioskPage() {
   const [kioskPrefs, setKioskPrefs] = useState(() =>
     typeof window !== "undefined" ? loadKioskPrefs() : { ...DEFAULT_KIOSK_PREFS },
   );
+  const [activeReminder, setActiveReminder] = useState<Reminder | null>(null);
   const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const bumpPlaylist = useCallback(() => setPlaylist(computeEffectivePlaylist()), []);
 
@@ -195,6 +198,7 @@ function KioskPage() {
     dismissTimerRef.current = setTimeout(() => {
       setActive(null);
       setSpokenText(null);
+      setActiveReminder(null);
       dismissTimerRef.current = null;
     }, ms);
   };
@@ -262,6 +266,116 @@ function KioskPage() {
     }, 250);
   };
 
+  const handleRecognize = async (results: { person: Person; confidence: number; expression: string }[], logId: string) => {
+    if (active) return;
+    const mainResult = results[0];
+    if (mainResult) {
+      try {
+        setLoading(true);
+        const prefs = loadKioskPrefs();
+        
+        setActive({ results });
+
+        const h = new Date().getHours();
+        const todayStr = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+        const todayMD = todayStr.slice(5, 10);
+        
+        const isBirthdayToday = mainResult.person.birthday?.slice(5, 10) === todayMD;
+        const shouldCelebrate = isBirthdayToday && !hasBeenCelebratedToday(mainResult.person.id);
+
+        // Check for today's reminders
+        const todayReminder = mainResult.person.reminders?.find(r => r.date === todayStr && !r.isDone);
+        if (todayReminder) {
+          setActiveReminder(todayReminder);
+          sendTelegram(`<b>Eslatma:</b> ${mainResult.person.name} keldi. Xabar: "${todayReminder.message}"`);
+        }
+        
+        // Force English as requested
+        const timeGreeting = h < 12 ? "Good morning" : h < 18 ? "Good day" : "Good evening";
+
+        setBirthdayHighlight(shouldCelebrate);
+        const weather = await getWeather("en");
+        const greetText = `${timeGreeting}, ${mainResult.person.name}! How are you today? ${weather}`.trim();
+
+        setSpokenText(greetText);
+
+        const mightListen =
+          voice && prefs.hourlyCheckEnabled && shouldAskHourlyCheck(mainResult.person.id);
+
+        // Safety timeout
+        const safetyTimer = setTimeout(() => {
+           if (active) scheduleDismiss(0);
+        }, 15000);
+
+        try {
+          if (voice) {
+            const speechLang = "en";
+            
+            await speakAndWait(greetText, speechLang, { elevenKey });
+
+            if (todayReminder) {
+               await speakAndWait(`You have a reminder: ${todayReminder.message}`, "en", { elevenKey });
+            }
+
+            if (shouldCelebrate) {
+              playCelebrateSound();
+              triggerConfetti();
+              await speakAndWait(birthdaySpeechLine(mainResult.person.name, "en"), "en", { elevenKey });
+              markCelebratedToday(mainResult.person.id);
+            }
+
+            if (mightListen) {
+              const prior = getHourlyMem(mainResult.person.id);
+              let q = buildHourlyQuestion(mainResult.person.name, "en", prior?.transcript ?? null);
+              if (prefs.hourlyUseOpenAI) {
+                const polished = await polishHourlyFollowUp(
+                  `Employee ${mainResult.person.name}. Previous note: "${prior?.transcript ?? "none"}". One short warm sentence asking mood + today's plan.`,
+                  "English",
+                );
+                if (polished) q = polished;
+              }
+
+              setSpokenText(`${greetText}\n\n${q}`);
+              await speakAndWait(q, "en", { elevenKey });
+
+              const heard = await listen("en");
+              if (heard.trim()) {
+                saveHourlyResponse(mainResult.person.id, heard);
+                
+                // Update Log in Admin Panel (Site)
+                addLog({
+                  id: logId,
+                  personId: mainResult.person.id,
+                  name: mainResult.person.name,
+                  confidence: mainResult.confidence,
+                  timestamp: Date.now(),
+                  expression: mainResult.expression,
+                  transcript: heard
+                });
+
+                // ADMIN FEEDBACK: Send to Telegram
+                sendTelegram(`<b>Feedback:</b> ${mainResult.person.name} dedi ki: "${heard}"`);
+
+                const thanks = `Thank you, ${mainResult.person.name}. Have a great day!`;
+                setSpokenText(`${greetText}\n\n${q}\n\n(${heard})\n\n${thanks}`);
+                await speakAndWait(thanks, "en", { elevenKey });
+              }
+            }
+          }
+        } finally {
+          clearTimeout(safetyTimer);
+          if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
+          scheduleDismiss(mightListen ? 4500 : 3500);
+        }
+      } catch (e) {
+        console.error("Greeting error:", e);
+        scheduleDismiss(0);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
   const elevenKey =
     apiKey.trim() ||
     (typeof window !== "undefined" ? localStorage.getItem("visiongate:elevenlabs_key")?.trim() : undefined) ||
@@ -314,7 +428,7 @@ function KioskPage() {
       {/* ── Recognition Engine ── */}
       <RecognitionEngine
         voiceEnabled={voice}
-        onRecognize={async (results) => {
+        onRecognize={async (results, logId) => {
           if (active) return;
 
           const blacklisted = results.find((r) => r.person.isBlacklisted);
@@ -339,7 +453,8 @@ function KioskPage() {
           await handleRecognize(results, logId);
 
           results.forEach((r) => {
-            sendTelegram(`<b>${r.person.role} keldi:</b> ${r.person.birthday?.slice(5, 10) === `${String(new Date().getMonth() + 1).padStart(2, "0")}-${String(new Date().getDate()).padStart(2, "0")}` ? "🎂 " : ""}${r.person.name}`);
+            const isBirthdayToday = r.person.birthday?.slice(5, 10) === new Date().toISOString().slice(5, 10);
+            sendTelegram(`<b>${r.person.role} keldi:</b> ${isBirthdayToday ? "🎂 " : ""}${r.person.name}`);
           });
 
         }}
@@ -352,6 +467,7 @@ function KioskPage() {
           setActive(null);
           setSpokenText(null);
           setBirthdayHighlight(false);
+          setActiveReminder(null);
         }}
       />
 
@@ -360,6 +476,7 @@ function KioskPage() {
         spokenText={spokenText} 
         birthdayHighlight={birthdayHighlight} 
         language={birthdayHighlight ? "en" : undefined}
+        reminder={activeReminder}
       />
 
       <AnimatePresence>

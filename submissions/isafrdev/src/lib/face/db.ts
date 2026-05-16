@@ -202,6 +202,7 @@ function mapPersonFromDB(row: any): Person {
     embeddings: row.embeddings || [],
     avatar: row.avatar || undefined,
     isBlacklisted: row.is_blacklisted ?? false,
+    reminders: row.reminders || [],
     createdAt: row.created_at ? new Date(row.created_at).getTime() : Date.now(),
   };
 }
@@ -220,6 +221,7 @@ function mapPersonToDB(p: Person) {
     embeddings: p.embeddings,
     avatar: p.avatar || null,
     is_blacklisted: p.isBlacklisted ?? false,
+    reminders: p.reminders || [],
     created_at: new Date(p.createdAt).toISOString(),
   };
 }

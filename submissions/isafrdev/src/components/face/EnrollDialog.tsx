@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Camera, Check, RotateCcw, X, Upload, Sparkles } from "lucide-react";
+import { Camera, Check, RotateCcw, X, Upload, Sparkles, Trash2, Plus } from "lucide-react";
 import * as faceapi from "face-api.js";
 import { loadFaceModels, detectAndDescribe } from "@/lib/face/recognizer";
 import { savePerson } from "@/lib/face/db";
-import type { GreetingMode, Language, Person } from "@/lib/face/types";
+import type { GreetingMode, Language, Person, Reminder } from "@/lib/face/types";
 
 const OPTIONAL_HINTS = [
   "Asosiy surat (majburiy)",
@@ -79,6 +79,9 @@ export function EnrollDialog({
   const [greetingMode, setGreetingMode] = useState<GreetingMode>("always");
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [isBlacklisted, setIsBlacklisted] = useState(false);
+  const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [newRemDate, setNewRemDate] = useState("");
+  const [newRemMsg, setNewRemMsg] = useState("");
 
   useEffect(() => {
     if (initialPerson) {
@@ -91,6 +94,7 @@ export function EnrollDialog({
       setGreetingMode(initialPerson.greetingMode);
       setVoiceEnabled(initialPerson.voiceEnabled);
       setIsBlacklisted(initialPerson.isBlacklisted || false);
+      setReminders(initialPerson.reminders || []);
       setCaptures([]);
       setPhotoFinished(false);
     } else {
@@ -105,6 +109,7 @@ export function EnrollDialog({
       setGreetingMode("always");
       setVoiceEnabled(true);
       setIsBlacklisted(false);
+      setReminders([]);
     }
   }, [initialPerson, open]);
 
@@ -179,6 +184,7 @@ export function EnrollDialog({
       isBlacklisted,
       embeddings: captures.length > 0 ? captures.map((c) => c.embedding) : initialPerson?.embeddings || [],
       avatar: captures.length > 0 ? captures[0]?.snapshot : initialPerson?.avatar || "",
+      reminders,
       createdAt: initialPerson?.createdAt || Date.now(),
     };
     await savePerson(p);
@@ -405,6 +411,52 @@ export function EnrollDialog({
                   />
                   Qora ro'yxatga olish (Blacklist)
                 </label>
+              </div>
+
+              <div className="border-t border-white/5 pt-4 mt-2">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Eslatmalar (Reminders)</span>
+                  <span className="text-[10px] font-mono text-primary">{reminders.length} ta</span>
+                </div>
+                
+                <div className="space-y-2 mb-3 max-h-32 overflow-y-auto custom-scrollbar pr-2">
+                  {reminders.map((r, idx) => (
+                    <div key={r.id || idx} className="flex items-center justify-between p-2 rounded-lg bg-primary/5 border border-primary/10 text-[11px]">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-bold text-primary">{r.date}</div>
+                        <div className="truncate opacity-80">{r.message}</div>
+                      </div>
+                      <button 
+                        onClick={() => setReminders(reminders.filter((_, i) => i !== idx))}
+                        className="p-1.5 text-destructive hover:bg-destructive/10 rounded-md transition"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                  {reminders.length === 0 && <div className="text-[10px] text-muted-foreground/40 italic text-center py-2">Eslatmalar mavjud emas</div>}
+                </div>
+
+                <div className="flex gap-2 items-end">
+                   <div className="flex-1">
+                      <span className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Sana</span>
+                      <input type="date" value={newRemDate} onChange={e => setNewRemDate(e.target.value)} className="input !py-1 text-xs" />
+                   </div>
+                   <div className="flex-[2]">
+                      <span className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Xabar</span>
+                      <input value={newRemMsg} onChange={e => setNewRemMsg(e.target.value)} className="input !py-1 text-xs" placeholder="Majlis..." />
+                   </div>
+                   <button 
+                      onClick={() => {
+                        if(!newRemDate || !newRemMsg) return;
+                        setReminders([...reminders, { id: crypto.randomUUID(), date: newRemDate, message: newRemMsg }]);
+                        setNewRemMsg("");
+                      }}
+                      className="p-2 bg-primary text-primary-foreground rounded-lg hover:brightness-110 transition"
+                   >
+                      <Plus className="h-4 w-4" />
+                   </button>
+                </div>
               </div>
             </div>
 

@@ -14,7 +14,16 @@ export interface Person {
   embeddings: number[][]; // multiple captures (3 angles)
   avatar?: string; // dataURL of first capture
   isBlacklisted?: boolean;
+  reminders?: Reminder[];
   createdAt: number;
+}
+
+export interface Reminder {
+  id: string;
+  date: string; // YYYY-MM-DD
+  message: string;
+  imageUrl?: string;
+  isDone?: boolean;
 }
 
 export interface RecognitionLog {
