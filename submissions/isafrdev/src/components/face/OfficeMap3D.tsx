@@ -109,15 +109,6 @@ const ZONES: Zone[] = [
     accent: "#f43f5e",
     images: ["/assets/office-zones/uzcombinator/1.jpg", "/assets/office-zones/uzcombinator/2.jpg"]
   },
-  {
-    id: "05",
-    name: "Founders House",
-    description: "Yopiq hudud. Kirish mumkin emas!",
-    x: 55, y: 74, w: 30, h: 24,
-    type: "main",
-    gradient: "from-red-900 to-black",
-    accent: "#000000",
-    images: ["/assets/office-zones/founder-house/1.jpg", "/assets/office-zones/founder-house/2.jpg"]
   },
 ];
 
