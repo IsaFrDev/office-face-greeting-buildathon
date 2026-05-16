@@ -66,7 +66,6 @@ const ZONES: Zone[] = [
     type: "main",
     gradient: "from-orange-500 to-red-600",
     accent: "#ef4444",
-    images: ["/assets/office-zones/cafe/1.jpg", "/assets/office-zones/cafe/2.jpg"]
   },
   {
     id: "mutolaa",
@@ -468,6 +467,8 @@ export function OfficeMap3D({ onClose }: OfficeMap3DProps) {
             <NavBot 
               path={NAV_PATH} 
               onMilestone={(zoneId) => {
+                const zone = ZONES.find(z => z.id === zoneId);
+                if (!zone?.images?.length) return; // skip zones without images
                 setSelectedId(zoneId);
                 setTimeout(() => {
                   setSelectedId((prev) => (prev === zoneId ? null : prev));
