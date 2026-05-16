@@ -1,10 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Settings } from "lucide-react";
+import { Settings, Map as MapIcon } from "lucide-react";
+
 import { VideoPlayer } from "@/components/face/VideoPlayer";
 import { GreetingOverlay } from "@/components/face/GreetingOverlay";
 import { RecognitionEngine } from "@/components/face/RecognitionEngine";
+import { OfficeMap3D } from "@/components/face/OfficeMap3D";
+import { AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
+
 import type { PlaylistItem } from "@/lib/face/types";
 import { speakAndWait, listen, birthdaySpeechLine } from "@/lib/face/voice";
 import { sendTelegram } from "@/lib/face/telegram";
@@ -72,6 +76,8 @@ function KioskPage() {
   const [now, setNow] = useState<Date | null>(null);
   const [spokenText, setSpokenText] = useState<string | null>(null);
   const [birthdayHighlight, setBirthdayHighlight] = useState(false);
+  const [showMap, setShowMap] = useState(false);
+
   const [kioskPrefs, setKioskPrefs] = useState(() =>
     typeof window !== "undefined" ? loadKioskPrefs() : { ...DEFAULT_KIOSK_PREFS },
   );
@@ -281,17 +287,29 @@ function KioskPage() {
             </div>
           </div>
         </div>
-        <div className="pointer-events-auto">
-          <div className="glass-strong rounded-2xl px-6 py-3 border border-white/5 shadow-2xl">
-            <div
-              className="font-mono text-2xl font-bold leading-none tabular-nums text-primary tracking-tighter"
-              suppressHydrationWarning
-            >
-              {now ? now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }) : "--:--"}
+        
+        <div className="flex gap-4">
+          <button
+            onClick={() => setShowMap(true)}
+            className="glass-strong pointer-events-auto flex items-center gap-3 rounded-2xl px-6 py-3 border border-white/5 shadow-2xl text-white hover:bg-primary/10 transition"
+          >
+            <MapIcon className="h-5 w-5 text-primary" />
+            <span className="text-[10px] font-bold uppercase tracking-widest">Office Map</span>
+          </button>
+
+          <div className="pointer-events-auto">
+            <div className="glass-strong rounded-2xl px-6 py-3 border border-white/5 shadow-2xl">
+              <div
+                className="font-mono text-2xl font-bold leading-none tabular-nums text-primary tracking-tighter"
+                suppressHydrationWarning
+              >
+                {now ? now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }) : "--:--"}
+              </div>
             </div>
           </div>
         </div>
       </header>
+
 
       {/* ── Recognition Engine ── */}
       <RecognitionEngine
@@ -421,6 +439,11 @@ function KioskPage() {
         birthdayHighlight={birthdayHighlight} 
         language={birthdayHighlight ? "en" : undefined}
       />
+
+      <AnimatePresence>
+        {showMap && <OfficeMap3D onClose={() => setShowMap(false)} />}
+      </AnimatePresence>
+
 
       {/* ── HUD Bottom Bar ── */}
       <footer

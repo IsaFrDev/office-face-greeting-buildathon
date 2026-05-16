@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, useRef } from "react";
 import { format, subDays, eachDayOfInterval, isSameDay, subMonths, startOfToday } from "date-fns";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Reorder } from "framer-motion";
 import { 
   Users, 
   Settings, 
@@ -22,8 +22,11 @@ import {
   Upload,
   Image as ImageIcon,
   Eraser,
-  X
+  X,
+  GripVertical,
+  Map as MapIcon
 } from "lucide-react";
+
 import { listPeople, deletePerson, listLogs, clearLogs, saveFile, deleteFile, getFile, persistPlaylist, loadPlaylistFromStorage, PLAYLIST_LS_KEY, PLAYLIST_DAY_LS_KEY } from "@/lib/face/db";
 import { saveKioskPrefs, loadKioskPrefs, type KioskPrefs } from "@/lib/face/kioskPrefs";
 import { pushPlaylistRemote } from "@/lib/face/playlistSync";
@@ -31,6 +34,8 @@ import { captureVideoPosterDataUrl } from "@/lib/face/videoPoster";
 import type { Person, RecognitionLog, PlaylistItem } from "@/lib/face/types";
 import { EnrollDialog } from "@/components/face/EnrollDialog";
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { OfficeMap3D } from "@/components/face/OfficeMap3D";
+
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
@@ -58,6 +63,8 @@ function AdminPage() {
   const [tgToken, setTgToken] = useState("");
   const [tgChatId, setTgChatId] = useState("");
   const [now, setNow] = useState(new Date());
+  const [showMap, setShowMap] = useState(false);
+
 
   useEffect(() => {
     if (localStorage.getItem("visiongate:auth") !== "true") {
@@ -169,7 +176,9 @@ function AdminPage() {
           <SidebarLink active={activeTab === "settings"} icon={Settings} label="Boshqaruv Paneli" onClick={() => setActiveTab("settings")} />
           <SidebarLink active={activeTab === "media"} icon={Play} label="Media Manager" onClick={() => setActiveTab("media")} />
           <SidebarLink active={activeTab === "logs"} icon={History} label="Tizim Loglari" onClick={() => setActiveTab("logs")} />
+          <SidebarLink active={false} icon={MapIcon} label="Office Map 3D" onClick={() => setShowMap(true)} />
         </nav>
+
 
         <div className="p-5 border-t border-border bg-primary/5 space-y-4">
           <div className="flex flex-col gap-2">
@@ -252,7 +261,12 @@ function AdminPage() {
         onClose={() => { setEnrollOpen(false); setEditingPerson(undefined); }} 
         onCreated={refresh} 
       />
+
+      <AnimatePresence>
+        {showMap && <OfficeMap3D onClose={() => setShowMap(false)} />}
+      </AnimatePresence>
     </div>
+
   );
 }
 
@@ -778,6 +792,11 @@ function MediaView({
   const [preview, setPreview] = useState<{ url: string; kind: "video" | "image" } | null>(null);
   const [uploading, setUploading] = useState(false);
 
+  const reorderItems = (newOrder: PlaylistItem[]) => {
+    persistPlaylist(newOrder, storageKey);
+    onRefresh();
+  };
+
   const setImageDurationSeconds = (id: string, sec: number) => {
     const secClamped = Math.min(120, Math.max(2, sec));
     const np = playlist.map((p) => (p.id === id ? { ...p, duration: secClamped * 1000 } : p));
@@ -885,17 +904,33 @@ function MediaView({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <Reorder.Group
+        axis="y"
+        values={playlist}
+        onReorder={reorderItems}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      >
         {playlist.map((item, idx) => (
-          <div key={item.id} className="glass rounded-2xl overflow-hidden border-border hover:border-primary/30 transition-all duration-500 group shadow-lg flex flex-col">
+          <Reorder.Item
+            key={item.id}
+            value={item}
+            className="glass rounded-2xl overflow-hidden border-border hover:border-primary/30 transition-all duration-500 group shadow-lg flex flex-col cursor-grab active:cursor-grabbing"
+          >
             <div
-              className="aspect-video bg-black flex items-center justify-center relative cursor-pointer"
+              className="aspect-video bg-black flex items-center justify-center relative"
               onClick={() => void handlePreview(item)}
             >
               <div className="absolute top-3 left-3 px-2 py-1 rounded bg-black/60 text-[9px] font-mono text-primary border border-primary/20 backdrop-blur z-10">
                 {idx + 1}.{" "}
                 {item.type === "video" ? "VIDEO" : item.type === "image" ? "RASM" : "KARTOCHKA"}
               </div>
+              
+              <div className="absolute top-3 right-3 flex items-center gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="p-1.5 bg-black/60 rounded border border-white/10 text-white/50 cursor-ns-resize">
+                  <GripVertical className="h-4 w-4" />
+                </div>
+              </div>
+
               {item.type === "video" && item.poster && (
                 <img
                   src={item.poster}
@@ -903,30 +938,6 @@ function MediaView({
                   className="absolute inset-0 h-full w-full object-cover opacity-45 group-hover:opacity-70 transition-opacity"
                 />
               )}
-              <div className="absolute top-3 right-3 flex flex-col gap-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    moveItem(idx, "up");
-                  }}
-                  disabled={idx === 0}
-                  className="p-1.5 bg-black/60 rounded border border-white/10 text-white hover:bg-primary disabled:opacity-30"
-                >
-                  <Plus className="h-3 w-3 rotate-180 transform -scale-y-100" />
-                </button>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    moveItem(idx, "down");
-                  }}
-                  disabled={idx === playlist.length - 1}
-                  className="p-1.5 bg-black/60 rounded border border-white/10 text-white hover:bg-primary disabled:opacity-30"
-                >
-                  <Plus className="h-3 w-3" />
-                </button>
-              </div>
 
               {item.type === "video" ? (
                 <Play className="relative z-[1] h-10 w-10 text-primary/20 group-hover:text-primary transition-all duration-500 group-hover:scale-110" />
@@ -935,19 +946,13 @@ function MediaView({
               )}
 
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60 pointer-events-none" />
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                <span className="bg-primary/90 text-primary-foreground text-[8px] font-bold uppercase px-3 py-1.5 rounded-full shadow-lg">
-                  Ko'rish
-                </span>
-              </div>
             </div>
             <div className="p-5 bg-card border-t border-border flex-1 space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="truncate flex-1 min-w-0">
                   <div className="text-xs font-bold truncate text-foreground/90">{item.name || "Media Element"}</div>
                   <div className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest mt-1">
-                    Ketma-ketlikda #{idx + 1}
-                    {item.type === "video" && <span className="text-primary/70"> · tugaguncha ijro</span>}
+                    #{idx + 1} {item.type === "video" && <span className="text-primary/70"> · video</span>}
                   </div>
                 </div>
                 <button 
@@ -982,9 +987,10 @@ function MediaView({
                 </div>
               )}
             </div>
-          </div>
+          </Reorder.Item>
         ))}
-      </div>
+      </Reorder.Group>
+
 
       <AnimatePresence>
         {preview && (
