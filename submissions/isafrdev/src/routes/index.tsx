@@ -285,9 +285,19 @@ function KioskPage() {
 
         // Check for today's reminders
         const todayReminder = mainResult.person.reminders?.find(r => r.date === todayStr && !r.isDone);
+        let lateMessage = "";
+        
         if (todayReminder) {
           setActiveReminder(todayReminder);
-          sendTelegram(`<b>Eslatma:</b> ${mainResult.person.name} keldi. Xabar: "${todayReminder.message}"`);
+          
+          if (todayReminder.time) {
+             const nowStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+             if (nowStr > todayReminder.time) {
+                lateMessage = `Wait, ${mainResult.person.name}. Why are you late? You have a ${todayReminder.message} at ${todayReminder.time}!`;
+             }
+          }
+          
+          sendTelegram(`<b>Eslatma:</b> ${mainResult.person.name} keldi. Xabar: "${todayReminder.message}" ${lateMessage ? " (KECH QOLDI)" : ""}`);
         }
         
         // Force English as requested
@@ -295,7 +305,11 @@ function KioskPage() {
 
         setBirthdayHighlight(shouldCelebrate);
         const weather = await getWeather("en");
-        const greetText = `${timeGreeting}, ${mainResult.person.name}! How are you today? ${weather}`.trim();
+        let greetText = `${timeGreeting}, ${mainResult.person.name}! How are you today? ${weather}`.trim();
+        
+        if (lateMessage) {
+          greetText = `${lateMessage}\n\n${greetText}`;
+        }
 
         setSpokenText(greetText);
 
@@ -311,10 +325,15 @@ function KioskPage() {
           if (voice) {
             const speechLang = "en";
             
-            await speakAndWait(greetText, speechLang, { elevenKey });
+            if (lateMessage) {
+               await speakAndWait(lateMessage, "en", { elevenKey });
+               await new Promise(r => setTimeout(r, 500));
+            }
+            
+            await speakAndWait(`${timeGreeting}, ${mainResult.person.name}! How are you today?`, speechLang, { elevenKey });
 
-            if (todayReminder) {
-               await speakAndWait(`You have a reminder: ${todayReminder.message}`, "en", { elevenKey });
+            if (todayReminder && !lateMessage) {
+               await speakAndWait(`Reminder: You have a ${todayReminder.message} today.`, "en", { elevenKey });
             }
 
             if (shouldCelebrate) {

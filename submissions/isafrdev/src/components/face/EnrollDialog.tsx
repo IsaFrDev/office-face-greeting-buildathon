@@ -81,6 +81,7 @@ export function EnrollDialog({
   const [isBlacklisted, setIsBlacklisted] = useState(false);
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [newRemDate, setNewRemDate] = useState("");
+  const [newRemTime, setNewRemTime] = useState("");
   const [newRemMsg, setNewRemMsg] = useState("");
 
   useEffect(() => {
@@ -423,7 +424,7 @@ export function EnrollDialog({
                   {reminders.map((r, idx) => (
                     <div key={r.id || idx} className="flex items-center justify-between p-2 rounded-lg bg-primary/5 border border-primary/10 text-[11px]">
                       <div className="flex-1 min-w-0">
-                        <div className="font-bold text-primary">{r.date}</div>
+                        <div className="font-bold text-primary">{r.date} {r.time && `@ ${r.time}`}</div>
                         <div className="truncate opacity-80">{r.message}</div>
                       </div>
                       <button 
@@ -442,6 +443,10 @@ export function EnrollDialog({
                       <span className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Sana</span>
                       <input type="date" value={newRemDate} onChange={e => setNewRemDate(e.target.value)} className="input !py-1 text-xs" />
                    </div>
+                   <div className="w-20">
+                      <span className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Vaqt</span>
+                      <input type="time" value={newRemTime} onChange={e => setNewRemTime(e.target.value)} className="input !py-1 text-xs" />
+                   </div>
                    <div className="flex-[2]">
                       <span className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Xabar</span>
                       <input value={newRemMsg} onChange={e => setNewRemMsg(e.target.value)} className="input !py-1 text-xs" placeholder="Majlis..." />
@@ -449,8 +454,9 @@ export function EnrollDialog({
                    <button 
                       onClick={() => {
                         if(!newRemDate || !newRemMsg) return;
-                        setReminders([...reminders, { id: crypto.randomUUID(), date: newRemDate, message: newRemMsg }]);
+                        setReminders([...reminders, { id: crypto.randomUUID(), date: newRemDate, time: newRemTime || undefined, message: newRemMsg }]);
                         setNewRemMsg("");
+                        setNewRemTime("");
                       }}
                       className="p-2 bg-primary text-primary-foreground rounded-lg hover:brightness-110 transition"
                    >

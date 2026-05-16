@@ -21,6 +21,7 @@ export interface Person {
 export interface Reminder {
   id: string;
   date: string; // YYYY-MM-DD
+  time?: string; // HH:mm
   message: string;
   imageUrl?: string;
   isDone?: boolean;
