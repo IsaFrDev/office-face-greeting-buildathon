@@ -423,23 +423,13 @@ function KioskPage() {
           </div>
         </div>
         
-        <div className="flex gap-4">
-          <button
-            onClick={() => setShowMap(true)}
-            className="glass-strong pointer-events-auto flex items-center gap-3 rounded-2xl px-6 py-3 border border-white/5 shadow-2xl text-white hover:bg-primary/10 transition"
-          >
-            <MapIcon className="h-5 w-5 text-primary" />
-            <span className="text-[10px] font-bold uppercase tracking-widest">Office Map</span>
-          </button>
-
-          <div className="pointer-events-auto">
-            <div className="glass-strong rounded-2xl px-6 py-3 border border-white/5 shadow-2xl">
-              <div
-                className="font-mono text-2xl font-bold leading-none tabular-nums text-primary tracking-tighter"
-                suppressHydrationWarning
-              >
-                {now ? now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }) : "--:--"}
-              </div>
+        <div className="pointer-events-auto">
+          <div className="glass-strong rounded-2xl px-6 py-3 border border-white/5 shadow-2xl">
+            <div
+              className="font-mono text-2xl font-bold leading-none tabular-nums text-primary tracking-tighter"
+              suppressHydrationWarning
+            >
+              {now ? now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }) : "--:--"}
             </div>
           </div>
         </div>
@@ -509,13 +499,23 @@ function KioskPage() {
       <footer
         className={`pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-end justify-between p-8 transition-opacity duration-700 ${showHud ? "opacity-100" : "opacity-0"}`}
       >
-        <Link
-          to="/admin"
-          className="glass-strong pointer-events-auto flex items-center gap-3 rounded-xl px-5 py-3 text-[10px] font-bold uppercase tracking-[0.2em] transition hover:bg-primary/10 hover:text-primary border border-white/5"
-        >
-          <Settings className="h-4 w-4" /> Tizim Boshqaruvi
-        </Link>
-        <div className="glass-strong pointer-events-auto rounded-2xl px-6 py-3 font-mono text-[9px] uppercase tracking-[0.4em] text-muted-foreground/60 border border-white/5">
+        <div className="flex gap-3">
+          <Link
+            to="/admin"
+            className="glass-strong pointer-events-auto flex items-center gap-3 rounded-xl px-5 py-3 text-[10px] font-bold uppercase tracking-[0.2em] transition hover:bg-primary/10 hover:text-primary border border-white/5 shadow-xl"
+          >
+            <Settings className="h-4 w-4" /> Tizim Boshqaruvi
+          </Link>
+          <button
+            onClick={() => setShowMap(true)}
+            className="glass-strong pointer-events-auto flex items-center gap-3 rounded-xl px-5 py-3 text-[10px] font-bold uppercase tracking-[0.2em] transition hover:bg-primary/10 hover:text-primary border border-white/5 shadow-xl text-white"
+          >
+            <MapIcon className="h-4 w-4 text-primary" />
+            <span>UzCombinator Hub</span>
+          </button>
+        </div>
+        
+        <div className="glass-strong pointer-events-auto rounded-2xl px-6 py-3 font-mono text-[9px] uppercase tracking-[0.4em] text-muted-foreground/60 border border-white/5 shadow-xl">
           Kiosk · Media · Supabase
         </div>
       </footer>
